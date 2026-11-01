@@ -12,6 +12,7 @@ const CAMP_T = 60;
 const CAMP_R = 12;
 const MISSION_T = 180;
 const EVERY = 210;
+const DISPERSE = 90; // dispersion au départ : ni mission ni démasquage
 
 class Espions extends Game {
   constructor(room, opts) {
@@ -23,7 +24,7 @@ class Espions extends Game {
     this.score = [0, 0];
     this.missions = []; // { id, team, agents:[a,b], point, circles:[{lat,lng,r0}], real:idx, until, t, moves, fake, startedAt }
     this.seq = 0;
-    this.nextMission = [20, 20 + EVERY / 2];
+    this.nextMission = [DISPERSE, DISPERSE + EVERY / 2];
     this.fakeReady = [0, 0];
     this.st = {};
     for (const id of this.ids) this.st[id] = { blockedUntil: 0, anchor: null, anchorAt: 0, camping: false, rdv: 0, unmasks: 0 };
@@ -159,6 +160,7 @@ class Espions extends Game {
     const s = this.st[id];
     const t = this.teamOf[id];
     if (s.blockedUntil > this.now) return;
+    if (this.elapsed < DISPERSE) return;
     if (a.type === 'unmask') {
       const c = this.unmaskCandidates(id);
       if (!c.includes(a.target)) return this.fx(id, { s: 'nope', m: 'Cette personne n’est pas à moins de 15 m', k: 'bad' });
@@ -214,7 +216,8 @@ class Espions extends Game {
     const ownActive = this.missions.filter((m) => m.team === t && !m.fake).length;
     const enemyActive = this.missions.filter((m) => m.team !== t).length;
     let status = null;
-    if (s.blockedUntil > this.now) status = { text: `⛔ Bloqué — ${Math.ceil((s.blockedUntil - this.now) / 1000)} s`, cls: 'bad pulse' };
+    if (this.elapsed < DISPERSE) status = { text: `🌫️ Dispersez-vous — premières missions dans ${Math.ceil(DISPERSE - this.elapsed)} s`, cls: 'info pulse' };
+    else if (s.blockedUntil > this.now) status = { text: `⛔ Bloqué — ${Math.ceil((s.blockedUntil - this.now) / 1000)} s`, cls: 'bad pulse' };
     else if (mine) {
       const partner = mine.agents.find((x) => x !== me);
       const left = Math.max(0, Math.ceil((mine.until - this.now) / 1000));
@@ -223,7 +226,7 @@ class Espions extends Game {
     else if (enemyActive) status = { text: `📻 ${enemyActive} rendez-vous ennemi${enemyActive > 1 ? 's' : ''} en cours : trouve le vrai cercle`, cls: 'warn' };
     else if (ownActive) status = { text: `🕵️ Ton équipe a ${ownActive} rendez-vous en cours`, cls: 'info' };
     const cands = this.unmaskCandidates(me);
-    const blocked = s.blockedUntil > this.now;
+    const blocked = s.blockedUntil > this.now || this.elapsed < DISPERSE;
     const fakeIn = Math.max(0, Math.ceil((this.fakeReady[t] - this.now) / 1000));
     return {
       team: { idx: t, name: TEAM_INFO[t].name, color: TEAM_INFO[t].color },

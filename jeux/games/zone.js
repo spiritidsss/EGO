@@ -119,7 +119,7 @@ class Zone extends Game {
   end() {
     const ranking = this.ranking((id) => (this.st[id].hp > 0 ? 100000 + this.st[id].hp : this.st[id].outAt))
       .map((r) => ({ ...r, score: Math.round(this.st[r.id].hp), detail: this.st[r.id].hp > 0 ? `${Math.round(this.st[r.id].hp)} PV` : `tombé à ${Math.floor((this.st[r.id].outAt || 0) / 60)}:${String(Math.floor((this.st[r.id].outAt || 0) % 60)).padStart(2, '0')}` }));
-    this.finish({ title: this.solo ? `Tu as survécu ${Math.floor(this.elapsed / 60)} min !` : `${ranking[0].name} survit à la Zone !`, winners: [ranking[0].id], ranking, unit: 'PV' });
+    this.finish({ title: this.solo ? `Tu as survécu ${Math.floor(this.elapsed / 60)} min !` : `${ranking[0].name} survit à la Zone !`, winners: this.solo ? [] : [ranking[0].id], ranking, unit: 'PV' });
   }
 
   act(id, a) {

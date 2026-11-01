@@ -116,7 +116,7 @@ class Meteores extends Game {
     const score = (id) => this.st[id].lives * 1000 + (this.st[id].outAt ?? this.elapsed) * 1 + this.st[id].crystals * 10;
     const ranking = this.ranking(score).map((r) => ({ ...r, score: this.st[r.id].crystals, detail: this.st[r.id].lives > 0 ? `${this.st[r.id].lives} ❤️` : `éliminé à ${fmt(this.st[r.id].outAt)}` }));
     const w = ranking[0];
-    this.finish({ title: this.solo ? `Tu as tenu ${fmt(this.elapsed)} !` : `${w.name} est le dernier debout !`, winners: [w.id], ranking, unit: '🔷' });
+    this.finish({ title: this.solo ? `Tu as tenu ${fmt(this.elapsed)} !` : `${w.name} est le dernier debout !`, winners: this.solo ? [] : [w.id], ranking, unit: '🔷' });
   }
 
   view(me) {
