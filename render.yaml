@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: nolimit-games
+    runtime: node
+    plan: free
+    rootDir: jeux
+    buildCommand: npm ci --omit=dev
+    startCommand: node server.js
+    healthCheckPath: /sante
+    autoDeploy: true

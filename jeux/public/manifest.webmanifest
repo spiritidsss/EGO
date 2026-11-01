@@ -1,0 +1,10 @@
+{
+  "name": "NOLIMIT GAMES",
+  "short_name": "NOLIMIT",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07061a",
+  "theme_color": "#07061a",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

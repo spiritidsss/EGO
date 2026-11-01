@@ -6,6 +6,7 @@ const GRAB = 12;
 const TAG = 12;
 const HOME = 15;
 const NO_GUARD = 25;
+const SETUP = 60;
 
 class Drapeau extends Game {
   constructor(room, opts) {
@@ -33,7 +34,7 @@ class Drapeau extends Game {
   tagCandidates(id) {
     const t = this.teamOf[id];
     const p = this.pos(id);
-    if (this.st[id].jailed) return [];
+    if (this.st[id].jailed || this.now < this.startAt + SETUP * 1000) return [];
     // Anti-camping : on ne peut pas toucher depuis le cercle de 25 m autour de son propre drapeau.
     if (this.flags[t].home && this.d(p, this.flags[t]) < NO_GUARD) return [];
     return this.teams[1 - t].filter((o) => {
@@ -57,8 +58,8 @@ class Drapeau extends Game {
       }
       const enemyFlag = this.flags[1 - t];
       const myFlag = this.flags[t];
-      // Prendre le drapeau adverse.
-      if (!enemyFlag.carrier && this.d(p, enemyFlag) <= GRAB && this.now - enemyFlag.droppedAt > 3000) {
+      // Prendre le drapeau adverse (pas pendant la mise en place).
+      if (this.elapsed >= SETUP && !enemyFlag.carrier && this.d(p, enemyFlag) <= GRAB && this.now - enemyFlag.droppedAt > 3000) {
         enemyFlag.carrier = id;
         enemyFlag.home = false;
         enemyFlag.grabbedAt = this.now;
@@ -141,7 +142,8 @@ class Drapeau extends Game {
     const cands = this.tagCandidates(me);
     const carrying = this.flags[1 - t].carrier === me;
     let status = null;
-    if (s.jailed) status = { text: '✋ Touché — retourne à ta base pour revenir en jeu', cls: 'bad pulse' };
+    if (this.elapsed < SETUP) status = { text: `🏰 Rejoins ton camp — la partie commence dans ${Math.ceil(SETUP - this.elapsed)} s`, cls: 'info pulse' };
+    else if (s.jailed) status = { text: '✋ Touché — retourne à ta base pour revenir en jeu', cls: 'bad pulse' };
     else if (carrying) status = { text: this.now < this.flags[1 - t].grabbedAt + 10000 ? `🚩 Élan : intouchable ${Math.ceil((this.flags[1 - t].grabbedAt + 10000 - this.now) / 1000)} s — FONCE !` : '🚩 Tu portes le drapeau ! Ramène-le à ta base', cls: 'good pulse' };
     else if (this.flags[t].carrier) status = { text: `🚨 ${this.name(this.flags[t].carrier)} a votre drapeau !`, cls: 'bad' };
     else if (this.flags[t].home && this.d(this.pos(me), this.flags[t]) < NO_GUARD) status = { text: '🚫 Trop près de ton drapeau : tu ne peux pas toucher d’ici', cls: 'warn' };

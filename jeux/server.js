@@ -1,16 +1,14 @@
 'use strict';
-// Nuit Blanche : serveur HTTP (fichiers + QR codes) et WebSocket (salles de jeu).
+// NOLIMIT GAMES : serveur HTTP (fichiers) et WebSocket (salles de jeu).
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { WebSocketServer } = require('ws');
-const QRCode = require('qrcode');
 const { Rooms } = require('./rooms');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC = path.join(__dirname, 'public');
 const VENDOR = {
-  '/vendor/jsQR.js': require.resolve('jsqr/dist/jsQR.js'),
   '/vendor/leaflet.js': require.resolve('leaflet/dist/leaflet.js'),
   '/vendor/leaflet.css': require.resolve('leaflet/dist/leaflet.css'),
 };
@@ -24,15 +22,9 @@ function send(res, code, type, body, extra = {}) {
   res.end(body);
 }
 
-const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, 'http://x');
-  const p = decodeURIComponent(url.pathname);
+const server = http.createServer((req, res) => {
   try {
-    if (p === '/qr.svg') {
-      const data = (url.searchParams.get('d') || '').slice(0, 300);
-      const svg = await QRCode.toString(data, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' });
-      return send(res, 200, TYPES['.svg'], svg, { 'Cache-Control': 'public, max-age=86400' });
-    }
+    const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (p === '/sante') return send(res, 200, 'text/plain', 'ok');
     if (VENDOR[p]) return send(res, 200, TYPES[path.extname(p)], fs.readFileSync(VENDOR[p]), { 'Cache-Control': 'public, max-age=86400' });
     let file = path.normalize(path.join(PUBLIC, p === '/' ? 'index.html' : p));
@@ -68,5 +60,5 @@ setInterval(() => {
   }
 }, 20000);
 
-server.listen(PORT, () => console.log(`Nuit Blanche sur http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`NOLIMIT GAMES sur http://localhost:${PORT}`));
 module.exports = { server, rooms };
