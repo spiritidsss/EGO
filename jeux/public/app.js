@@ -10,12 +10,12 @@
     set(k, v) { try { localStorage.setItem(k, v); } catch {} },
   };
   const TILES = {
-    dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    voyager: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    dark: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    light: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    voyager: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   };
   const THEME_TILES = { recolte: 'voyager', meteores: 'dark', zone: 'voyager', horde: 'dark', drapeau: 'light', geiger: 'dark', primes: 'dark', espions: 'light', home: 'dark' };
-  const ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>';
+  const ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · Esri';
 
   // ---------- État ----------
   const S = {
@@ -307,7 +307,7 @@
     };
     // Carte de la zone.
     lobbyMap = L.map('lmap', { zoomControl: false, attributionControl: true });
-    L.tileLayer(TILES.dark, { attribution: ATTR, subdomains: 'abcd', maxZoom: 20 }).addTo(lobbyMap);
+    L.tileLayer(TILES.dark, { attribution: ATTR, maxZoom: 19, maxNativeZoom: 16 }).addTo(lobbyMap);
     lobbyMap.setView([48.8566, 2.3522], 15);
     lobbyMap.on('click', (e) => {
       if (S.manual) { setManualPos(e.latlng); updateLobby(); }
@@ -470,7 +470,7 @@
         <div class="bottom"><div id="panel" class="panel"></div><div class="actions" id="actions"></div></div>
       </section>`;
     gameMap = L.map('map', { zoomControl: false, attributionControl: true, zoomSnap: 0.5 });
-    L.tileLayer(TILES[THEME_TILES[info.theme] || 'dark'], { attribution: ATTR, subdomains: 'abcd', maxZoom: 20 }).addTo(gameMap);
+    L.tileLayer(TILES[THEME_TILES[info.theme] || 'dark'], { attribution: ATTR, maxZoom: 19, maxNativeZoom: 16 }).addTo(gameMap);
     const z = v.zone;
     gameMap.fitBounds(L.latLng(z.lat, z.lng).toBounds(z.r * 2.1));
     gameMap.on('dragstart', () => { S.follow = false; $('#recenter').classList.remove('on'); });
